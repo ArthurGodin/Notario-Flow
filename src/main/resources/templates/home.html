@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>NotárioFlow - Gestão</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <style>
+
+        body, h1, h2, h3, h4, h5, h6, .btn, .table {
+            font-family: "Times New Roman", Times, serif;
+        }
+    </style>
+
+</head>
+
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <h1 class="mb-0"><i class="bi bi-folder2-open"></i> NotárioFlow</h1>
+
+            <button type="button" class="btn btn-warning rounded-circle shadow-sm"
+                    data-bs-toggle="modal" data-bs-target="#modalFeedback"
+                    title="Sugerir Melhoria">
+                <i class="bi bi-lightbulb-fill text-white"></i>
+            </button>
+        </div>
+        <a href="/novo" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Novo Processo</a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover table-striped mb-0">
+                <thead class="table-dark">
+                <tr>
+                    <th>Cliente</th>
+                    <th>Tipo</th>
+                    <th style="width: 40%;">Status / Pendências</th>
+                    <th>Último Contato</th>
+                    <th style="min-width: 160px;">Ações</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="p : ${processos}">
+                    <td class="fw-bold" th:text="${p.cliente}">Cliente</td>
+                    <td><span class="badge bg-secondary" th:text="${p.tipoAto}">Tipo</span></td>
+
+                    <td>
+                        <div class="mb-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    data-bs-toggle="modal"
+                                    th:data-bs-target="'#modalPendencia' + ${p.id}"
+                                    title="Adicionar Nova Pendência">
+                                <i class="bi bi-plus-lg"></i> Adicionar Pendência
+                            </button>
+                        </div>
+
+                        <span th:if="${p.concluido}" class="badge bg-success">
+                            <i class="bi bi-check-circle"></i> Pronto p/ Assinar
+                        </span>
+
+                        <div th:each="pendencia : ${p.pendencias}" th:unless="${pendencia.resolvida}" class="mb-1">
+                            <form th:action="@{/pendencia/{id}/resolver(id=${pendencia.id})}" method="post" style="display: inline;">
+                                <button type="submit" class="btn btn-sm btn-outline-success p-0 px-1 border-0" title="Marcar como Resolvido">
+                                    <i class="bi bi-check-square-fill"></i>
+                                </button>
+
+                                <span th:if="${pendencia.responsavel.name() == 'CLIENTE'}" class="badge text-bg-danger">
+                                    Cliente: <span th:text="${pendencia.descricao}"></span>
+                                </span>
+                                <span th:if="${pendencia.responsavel.name() == 'CARTORIO'}" class="badge text-bg-warning">
+                                    Cartório: <span th:text="${pendencia.descricao}"></span>
+                                </span>
+                                <span th:if="${pendencia.responsavel.name() == 'PREFEITURA' or pendencia.responsavel.name() == 'SEFAZ'}" class="badge text-bg-info">
+                                    Gov: <span th:text="${pendencia.descricao}"></span>
+                                </span>
+                                <span th:if="${pendencia.responsavel.name() == 'SUPERVISOR'}" class="badge" style="background-color: purple; color: white;">
+                                    Tabeliã: <span th:text="${pendencia.descricao}"></span>
+                                </span>
+                            </form>
+                        </div>
+
+                        <div class="modal fade" th:id="'modalPendencia' + ${p.id}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form th:action="@{/processo/{id}/pendencia(id=${p.id})}" method="post">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Nova Pendência: <span th:text="${p.cliente}"></span></h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="mb-3">
+                                                <label class="form-label">Descrição (O que falta?)</label>
+                                                <input type="text" name="descricao" class="form-control" placeholder="Ex: Assinatura da esposa" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Pendente por parte de:</label>
+                                                <select name="responsavel" class="form-select" required>
+                                                    <option value="CLIENTE">Cliente</option>
+                                                    <option value="CARTORIO">Cartório (Você)</option>
+                                                    <option value="PREFEITURA">Prefeitura</option>
+                                                    <option value="SEFAZ">Sefaz</option>
+                                                    <option value="SUPERVISOR">Tabeliã/Supervisor</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                            <button type="submit" class="btn btn-primary">Salvar</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td th:text="${#temporals.format(p.ultimoContato, 'dd/MM/yyyy HH:mm')}">Data</td>
+
+                    <td>
+                        <div class="btn-group" role="group">
+                            <a target="_blank"
+                               th:href="'https://wa.me/?text=Olá, referente ao processo de ' + ${p.tipoAto} + ' do(a) ' + ${p.cliente} + ', gostaria de verificar o andamento das pendências.'"
+                               class="btn btn-sm btn-outline-success"
+                               title="Mandar WhatsApp">
+                                <i class="bi bi-whatsapp"></i>
+                            </a>
+
+                            <form th:action="@{/processo/{id}/cobrar(id=${p.id})}" method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-outline-primary" title="Atualizar Data (Cobrado)">
+                                    <i class="bi bi-clock-history"></i>
+                                </button>
+                            </form>
+
+                            <a th:href="@{/processo/{id}/editar(id=${p.id})}" class="btn btn-sm btn-outline-secondary" title="Editar Dados">
+                                <i class="bi bi-pencil-fill"></i>
+                            </a>
+
+                            <form th:action="@{/processo/{id}/deletar(id=${p.id})}" method="post" style="display:inline;"
+                                  onsubmit="return confirm('Tem certeza que deseja excluir este processo?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir">
+                                    <i class="bi bi-trash-fill"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalFeedback" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/feedback/salvar" method="post">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title text-white"><i class="bi bi-lightbulb"></i> Tenho uma ideia!</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>O que pode melhorar no sistema? Escreva aqui que eu recebo na hora.</p>
+                    <textarea name="texto" class="form-control" rows="4" placeholder="Ex: Colocar um campo para telefone..." required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning text-white fw-bold">Enviar Ideia</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

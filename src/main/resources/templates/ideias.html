@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Ideias</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-dark text-white">
+<div class="container mt-5">
+    <h1>💡 Ideias de Melhoria</h1>
+    <hr>
+    <div class="list-group">
+        <div th:each="f : ${feedbacks}" class="list-group-item list-group-item-action">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1 text-dark" th:text="${f.texto}">Ideia aqui</h5>
+                <small class="text-muted" th:text="${#temporals.format(f.data, 'dd/MM HH:mm')}">Data</small>
+            </div>
+        </div>
+        <div th:if="${feedbacks.isEmpty()}" class="alert alert-info">Nenhuma ideia cadastrada ainda.</div>
+    </div>
+    <a href="/" class="btn btn-outline-light mt-3">Voltar</a>
+</div>
+</body>
+</html>

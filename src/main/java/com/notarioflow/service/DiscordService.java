@@ -1,0 +1,30 @@
+package com.notarioflow.service;
+
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import java.util.HashMap;
+import java.util.Map;
+
+@Service
+public class DiscordService {
+
+    // Cole a URL que você copiou do Discord aqui dentro das aspas
+    private final String WEBHOOK_URL = "https://discord.com/api/webhooks/1442229607678873752/m34jqAW6z-pes3hJC4a6LdqRmIJl0uyeD6S99ZVtikM6Ts4BYBWbeFaUDrVJGt4LZ3U0";
+
+    public void enviarFeedback(String mensagem) {
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+
+            // O Discord espera um JSON assim: { "content": "sua mensagem" }
+            Map<String, String> payload = new HashMap<>();
+            payload.put("content", "💡 **Nova Ideia do Cartório:**\n" + mensagem);
+
+            // Dispara a mensagem para a internet
+            restTemplate.postForEntity(WEBHOOK_URL, payload, String.class);
+
+        } catch (Exception e) {
+            // Se der erro (sem internet), apenas imprime no console e não trava o sistema dela
+            System.err.println("Erro ao enviar pro Discord: " + e.getMessage());
+        }
+    }
+}
