@@ -9,13 +9,13 @@ import java.util.Map;
 public class DiscordService {
 
     // Cole a URL que você copiou do Discord aqui dentro das aspas
-    private final String WEBHOOK_URL = "https://discord.com/api/webhooks/1442229607678873752/m34jqAW6z-pes3hJC4a6LdqRmIJl0uyeD6S99ZVtikM6Ts4BYBWbeFaUDrVJGt4LZ3U0";
+    private final String WEBHOOK_URL = "https://discord.com/api/webhooks/1444096333983252531/ZiY991fUEfXx7QvvSWdZJztWa1ayrHPPuVLsjJvT1yEFu88c4TWeJGFAGKQa35iIC7UT";
 
     public void enviarFeedback(String mensagem) {
         try {
             RestTemplate restTemplate = new RestTemplate();
 
-            // O Discord espera um JSON assim: { "content": "sua mensagem" }
+            // O Discord espera um JSON assim: { "content": "sua mensagem " }
             Map<String, String> payload = new HashMap<>();
             payload.put("content", "💡 **Nova Ideia do Cartório:**\n" + mensagem);
 
